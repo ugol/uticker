@@ -2,21 +2,21 @@ package main
 
 import (
 	"fmt"
-	"github.com/ugol/uticker/uticker"
+	. "github.com/ugol/uticker/uticker"
 	"time"
 )
 
 func main() {
 
-	ticker := uticker.NewUTicker()
+	ticker := NewUTicker()
 	runExample(ticker, "Normal ticker")
 
-	ticker1 := uticker.NewUTicker(uticker.WithImmediateStart)
+	ticker1 := NewUTicker(WithImmediateStart)
 	runExample(ticker1, "Immediate start ticker")
 
 }
 
-func runExample(ticker *uticker.UTicker, msg string) {
+func runExample(ticker *UTicker, msg string) {
 
 	fmt.Println(msg)
 	done := make(chan bool)
@@ -30,7 +30,7 @@ func runExample(ticker *uticker.UTicker, msg string) {
 			}
 		}
 	}()
-	time.Sleep(5 * time.Second)
+	time.Sleep(6 * time.Second)
 	ticker.Stop()
 	done <- true
 }
