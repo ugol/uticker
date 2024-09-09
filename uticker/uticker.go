@@ -6,10 +6,10 @@ import (
 
 type UTicker struct {
 	C              chan time.Time
-	ticker         *time.Ticker
 	Duration       time.Duration
 	ImmediateStart bool
 	NextTick       func() time.Duration
+	ticker         *time.Ticker
 }
 
 func WithImmediateStart() func(*UTicker) {
