@@ -11,7 +11,7 @@ type TickerConfig struct {
 
 type UTicker struct {
 	C      chan time.Time
-	ticker time.Ticker
+	ticker *time.Ticker
 	config TickerConfig
 }
 
@@ -45,7 +45,7 @@ func NewUTicker(options ...func(*TickerConfig) *TickerConfig) *UTicker {
 		}
 	}
 
-	t.ticker = *time.NewTicker(t.config.Duration)
+	t.ticker = time.NewTicker(t.config.Duration)
 
 	go func() {
 		if t.config.ImmediateStart {
@@ -63,14 +63,8 @@ func NewUTicker(options ...func(*TickerConfig) *TickerConfig) *UTicker {
 
 func (t *UTicker) Stop() {
 
-	//fmt.Println(t)
-	//fmt.Println(t.C)
-	//fmt.Println(t.ticker)
-
-	if t != nil {
-		t.ticker.Stop()
-		close(t.C)
-	}
+	t.ticker.Stop()
+	close(t.C)
 
 }
 
