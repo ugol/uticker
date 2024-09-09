@@ -10,6 +10,7 @@ type UTicker struct {
 	ImmediateStart bool
 	NextTick       func() time.Duration
 	ticker         *time.Ticker
+	counter        uint64
 }
 
 func WithImmediateStart() func(*UTicker) {
@@ -35,6 +36,18 @@ func WithExponentialBackoff(e int) func(*UTicker) {
 	}
 }
 
+func WithExponentialBackoffCapped(e int, max int) func(*UTicker) {
+	return func(t *UTicker) {
+		t.NextTick = func() time.Duration {
+			if t.counter > uint64(max) {
+				return t.Duration
+			} else {
+				return t.Duration * time.Duration(e)
+			}
+		}
+	}
+}
+
 func NewUTicker(options ...func(*UTicker)) *UTicker {
 
 	t := &UTicker{
@@ -52,11 +65,13 @@ func NewUTicker(options ...func(*UTicker)) *UTicker {
 	go func() {
 		if t.ImmediateStart {
 			t.C <- time.Now()
+			t.counter++
 		}
 		for {
 			select {
 			case <-t.ticker.C:
 				t.C <- time.Now()
+				t.counter++
 				if t.NextTick != nil {
 					t1 := t.NextTick()
 					t.Reset(t1)
