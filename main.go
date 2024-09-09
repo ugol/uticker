@@ -10,11 +10,18 @@ func main() {
 
 	ticker := NewUTicker()
 	defer ticker.Stop()
-	runExample(ticker, "Normal ticker")
+	runExample(ticker, "Normal ticker at 1s")
 
-	ticker1 := NewUTicker(WithImmediateStart)
+	ticker1 := NewUTicker(WithImmediateStart())
 	defer ticker1.Stop()
-	runExample(ticker1, "Immediate start ticker")
+	runExample(ticker1, "Immediate start ticker at 1s")
+
+	ticker2 := NewUTicker(
+		WithImmediateStart(),
+		WithDuration(100*time.Millisecond),
+	)
+	defer ticker2.Stop()
+	runExample(ticker2, "Immediate start ticker at 100ms")
 
 }
 

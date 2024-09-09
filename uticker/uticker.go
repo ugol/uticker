@@ -4,51 +4,44 @@ import (
 	"time"
 )
 
-type TickerConfig struct {
+type UTicker struct {
+	C              chan time.Time
+	ticker         *time.Ticker
 	Duration       time.Duration
 	ImmediateStart bool
 }
 
-type UTicker struct {
-	C      chan time.Time
-	ticker *time.Ticker
-	config TickerConfig
+func WithImmediateStart() func(*UTicker) {
+	return func(t *UTicker) {
+		t.ImmediateStart = true
+	}
 }
 
-func WithImmediateStart(c *TickerConfig) *TickerConfig {
-	c.ImmediateStart = true
-	return c
-}
-
-func WithDuration(c *TickerConfig) *TickerConfig {
-	d := 1 * time.Second
+func WithDuration(d time.Duration) func(*UTicker) {
 	if d <= 0 {
 		panic("non-positive interval for NewTicker")
 	}
-	c.Duration = d
-	return c
+	return func(t *UTicker) {
+		t.Duration = d
+	}
 }
 
-func NewUTicker(options ...func(*TickerConfig) *TickerConfig) *UTicker {
+func NewUTicker(options ...func(*UTicker)) *UTicker {
 
 	t := &UTicker{
-		C: make(chan time.Time),
-		config: TickerConfig{
-			Duration:       1 * time.Second,
-			ImmediateStart: false,
-		},
+		C:              make(chan time.Time),
+		Duration:       1 * time.Second,
+		ImmediateStart: false,
 	}
 
-	if options != nil {
-		for _, option := range options {
-			option(&t.config)
-		}
+	for _, option := range options {
+		option(t)
 	}
 
-	t.ticker = time.NewTicker(t.config.Duration)
+	t.ticker = time.NewTicker(t.Duration)
 
 	go func() {
-		if t.config.ImmediateStart {
+		if t.ImmediateStart {
 			t.C <- time.Now()
 		}
 		for {
