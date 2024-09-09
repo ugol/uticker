@@ -76,23 +76,30 @@ func NewUTicker(options ...func(*UTicker)) *UTicker {
 
 	go func() {
 		if t.ImmediateStart {
-			t.C <- time.Now()
-			t.counter++
+			tick(t)
 		}
 		for {
 			select {
 			case <-t.ticker.C:
-				t.C <- time.Now()
-				t.counter++
+				tick(t)
 				if t.NextTick != nil {
-					t1 := t.NextTick()
-					t.Reset(t1)
-					t.Duration = t1
+					calculateNextTick(t)
 				}
 			}
 		}
 	}()
 	return t
+}
+
+func calculateNextTick(t *UTicker) {
+	t1 := t.NextTick()
+	t.Reset(t1)
+	t.Duration = t1
+}
+
+func tick(t *UTicker) {
+	t.C <- time.Now()
+	t.counter++
 }
 
 func (t *UTicker) Stop() {
