@@ -27,10 +27,10 @@ func WithDuration(d time.Duration) func(*UTicker) {
 	}
 }
 
-func Exponential() func(*UTicker) {
+func WithExponentialBackoff(e int) func(*UTicker) {
 	return func(t *UTicker) {
 		t.NextTick = func() time.Duration {
-			return t.Duration * 2
+			return t.Duration * time.Duration(e)
 		}
 	}
 }
