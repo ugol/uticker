@@ -9,6 +9,7 @@ type UTicker struct {
 	ticker         *time.Ticker
 	Duration       time.Duration
 	ImmediateStart bool
+	NextTick       func() time.Duration
 }
 
 func WithImmediateStart() func(*UTicker) {
@@ -23,6 +24,14 @@ func WithDuration(d time.Duration) func(*UTicker) {
 	}
 	return func(t *UTicker) {
 		t.Duration = d
+	}
+}
+
+func Exponential() func(*UTicker) {
+	return func(t *UTicker) {
+		t.NextTick = func() time.Duration {
+			return t.Duration * 2
+		}
 	}
 }
 
@@ -48,6 +57,11 @@ func NewUTicker(options ...func(*UTicker)) *UTicker {
 			select {
 			case <-t.ticker.C:
 				t.C <- time.Now()
+				if t.NextTick != nil {
+					t1 := t.NextTick()
+					t.Reset(t1)
+					t.Duration = t1
+				}
 			}
 		}
 	}()

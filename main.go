@@ -23,6 +23,14 @@ func main() {
 	defer ticker2.Stop()
 	runExample(ticker2, "Immediate start ticker at 100ms")
 
+	ticker3 := NewUTicker(
+		WithImmediateStart(),
+		WithDuration(100*time.Millisecond),
+		Exponential(),
+	)
+	defer ticker3.Stop()
+	runExample(ticker3, "Immediate start ticker at 100ms with Exponential backoff")
+
 }
 
 func runExample(ticker *UTicker, msg string) {
@@ -39,6 +47,6 @@ func runExample(ticker *UTicker, msg string) {
 			}
 		}
 	}()
-	time.Sleep(6 * time.Second)
+	time.Sleep(3 * time.Second)
 	done <- true
 }
