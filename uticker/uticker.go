@@ -32,7 +32,7 @@ func WithDuration(c *TickerConfig) *TickerConfig {
 func NewUTicker(options ...func(*TickerConfig) *TickerConfig) *UTicker {
 
 	t := &UTicker{
-		C: make(chan time.Time, 1),
+		C: make(chan time.Time),
 		config: TickerConfig{
 			Duration:       1 * time.Second,
 			ImmediateStart: false,
@@ -63,8 +63,14 @@ func NewUTicker(options ...func(*TickerConfig) *TickerConfig) *UTicker {
 
 func (t *UTicker) Stop() {
 
-	//t.ticker.Stop()
-	//close(t.C)
+	//fmt.Println(t)
+	//fmt.Println(t.C)
+	//fmt.Println(t.ticker)
+
+	if t != nil {
+		t.ticker.Stop()
+		close(t.C)
+	}
 
 }
 

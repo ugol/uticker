@@ -9,9 +9,11 @@ import (
 func main() {
 
 	ticker := NewUTicker()
+	defer ticker.Stop()
 	runExample(ticker, "Normal ticker")
 
 	ticker1 := NewUTicker(WithImmediateStart)
+	defer ticker1.Stop()
 	runExample(ticker1, "Immediate start ticker")
 
 }
@@ -31,6 +33,5 @@ func runExample(ticker *UTicker, msg string) {
 		}
 	}()
 	time.Sleep(6 * time.Second)
-	ticker.Stop()
 	done <- true
 }
