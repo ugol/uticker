@@ -1,6 +1,7 @@
 package uticker
 
 import (
+	"math/rand/v2"
 	"time"
 )
 
@@ -55,6 +56,27 @@ func WithRampCapped(e int, max int) func(*UTicker) {
 				return t.Duration
 			} else {
 				return t.Duration / time.Duration(e)
+			}
+		}
+	}
+}
+
+func WithDeviation(percentage float64) func(*UTicker) {
+	return func(t *UTicker) {
+		t.NextTick = func() time.Duration {
+			deviation := t.Duration * time.Duration(percentage)
+			return t.Duration + deviation
+		}
+	}
+}
+
+func WithAnotherDurationWithGivenProbability(duration time.Duration, probability float64) func(*UTicker) {
+	return func(t *UTicker) {
+		t.NextTick = func() time.Duration {
+			if rand.Float64() < probability {
+				return t.Duration
+			} else {
+				return duration
 			}
 		}
 	}
