@@ -82,6 +82,15 @@ func WithAnotherDurationWithGivenProbability(duration time.Duration, probability
 	}
 }
 
+func WithRandomTickIn(duration time.Duration) func(*UTicker) {
+	return func(t *UTicker) {
+		t.NextTick = func() time.Duration {
+			d := rand.Float64() * float64(duration.Milliseconds())
+			return time.Duration(d) * time.Millisecond
+		}
+	}
+}
+
 func NewUTicker(options ...func(*UTicker)) *UTicker {
 
 	t := &UTicker{

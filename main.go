@@ -47,6 +47,13 @@ func main() {
 	defer ticker5.Stop()
 	runExample(ticker5, "Immediate start ticker at 5s with ramp (halfing each tick) and cap", 10*time.Second)
 
+	ticker6 := NewUTicker(
+		WithImmediateStart(),
+		WithRandomTickIn(1*time.Second),
+	)
+	defer ticker6.Stop()
+	runExample(ticker6, "Immediate start ticker with random tick in 1S", 5*time.Second)
+
 }
 
 func runExample(ticker *UTicker, msg string, d time.Duration) {
