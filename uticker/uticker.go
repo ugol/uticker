@@ -12,6 +12,7 @@ type UTicker struct {
 	nextTick       func() time.Duration
 	ticker         *time.Ticker
 	counter        uint64
+	stopChan       chan struct{}
 }
 
 func WithImmediateStart() func(*UTicker) {
@@ -120,6 +121,8 @@ func (t *UTicker) run() {
 			if t.nextTick != nil {
 				t.calculateNextTick()
 			}
+		case <-t.stopChan:
+			return
 		}
 	}
 }
