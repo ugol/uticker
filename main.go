@@ -71,14 +71,12 @@ func runExample(ticker *UTicker, msg string, d time.Duration) {
 			case t := <-ticker.C:
 				fmt.Println("Tick at", t)
 			case <-stop:
-				fmt.Println("STOPPED")
 				return
 			}
 		}
 	}()
 
 	time.AfterFunc(d, func() {
-		fmt.Println("STOPPING")
 		close(stop)
 	})
 	wg.Wait()
