@@ -1,4 +1,4 @@
-package uticker
+package main
 
 import (
 	"math/rand/v2"
