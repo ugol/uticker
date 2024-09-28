@@ -1,4 +1,4 @@
-package main
+package t
 
 import (
 	"math/rand/v2"
