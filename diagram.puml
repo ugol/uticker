@@ -1,0 +1,23 @@
+@startuml
+namespace t {
+    class UTicker << (S,Aquamarine) >> {
+        - frequency time.Duration
+        - immediateStart bool
+        - nextTick <font color=blue>func</font>() time.Duration
+        - ticker *time.Ticker
+        - counter uint64
+
+        + C <font color=blue>chan</font> time.Time
+
+        - run() 
+        - calculateNextTick() 
+        - tick() 
+
+        + Stop() 
+        + Reset(d time.Duration) 
+
+    }
+}
+
+
+@enduml
