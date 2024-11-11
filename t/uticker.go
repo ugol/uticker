@@ -1,6 +1,7 @@
 package t
 
 import (
+	"github.com/gorhill/cronexpr"
 	"math/rand/v2"
 	"time"
 )
@@ -12,6 +13,17 @@ type UTicker struct {
 	nextTick       func() time.Duration
 	ticker         *time.Ticker
 	counter        uint64
+}
+
+func WithCronExpression(cron string) func(*UTicker) {
+	return func(t *UTicker) {
+		t.nextTick = func() time.Duration {
+			now := time.Now()
+			nextTime := cronexpr.MustParse(cron).Next(now)
+			duration := nextTime.Sub(now)
+			return duration
+		}
+	}
 }
 
 func WithImmediateStart(b bool) func(*UTicker) {
