@@ -16,7 +16,15 @@ type UTicker struct {
 }
 
 func WithCronExpression(cron string) func(*UTicker) {
+
 	return func(t *UTicker) {
+
+		now := time.Now()
+		nextTime := cronexpr.MustParse(cron).Next(now)
+		duration := nextTime.Sub(now)
+		t.frequency = duration
+		t.immediateStart = false
+
 		t.nextTick = func() time.Duration {
 			now := time.Now()
 			nextTime := cronexpr.MustParse(cron).Next(now)
@@ -115,9 +123,6 @@ func NewUTicker(options ...func(*UTicker)) *UTicker {
 		option(t)
 	}
 
-	t.ticker = time.NewTicker(t.frequency)
-
-	go t.run()
 	return t
 }
 
@@ -155,6 +160,11 @@ func (t *UTicker) Stop() {
 	// Stop does not close the channel, to prevent a concurrent goroutine
 	// reading from the channel from seeing an erroneous "tick".
 	//close(t.C)
+}
+
+func (t *UTicker) Start() {
+	t.ticker = time.NewTicker(t.frequency)
+	go t.run()
 }
 
 func (t *UTicker) Reset(d time.Duration) {
