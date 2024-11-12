@@ -8,11 +8,11 @@ import (
 
 type UTicker struct {
 	C              chan time.Time
+	Counter        uint64
 	frequency      time.Duration
 	immediateStart bool
 	nextTick       func() time.Duration
 	ticker         *time.Ticker
-	counter        uint64
 }
 
 func WithCronExpression(cron string) func(*UTicker) {
@@ -60,7 +60,7 @@ func WithExponentialBackoff(e int) func(*UTicker) {
 func WithExponentialBackoffCapped(e int, max int) func(*UTicker) {
 	return func(t *UTicker) {
 		t.nextTick = func() time.Duration {
-			if t.counter > uint64(max) {
+			if t.Counter > uint64(max) {
 				return t.frequency
 			} else {
 				return t.frequency * time.Duration(e)
@@ -72,7 +72,7 @@ func WithExponentialBackoffCapped(e int, max int) func(*UTicker) {
 func WithRampCapped(e int, max int) func(*UTicker) {
 	return func(t *UTicker) {
 		t.nextTick = func() time.Duration {
-			if t.counter > uint64(max) {
+			if t.Counter > uint64(max) {
 				return t.frequency
 			} else {
 				return t.frequency / time.Duration(e)
@@ -145,12 +145,14 @@ func (t *UTicker) run() {
 func (t *UTicker) calculateNextTick() {
 	t1 := t.nextTick()
 	t.Reset(t1)
+
+	// this is needed to save frequency for calculations which might happen on it in nextTick
 	t.frequency = t1
 }
 
 func (t *UTicker) tick() {
 	t.C <- time.Now()
-	t.counter++
+	t.Counter++
 }
 
 func (t *UTicker) Stop() {
@@ -159,7 +161,7 @@ func (t *UTicker) Stop() {
 	// Stop turns off a ticker. After Stop, no more ticks will be sent.
 	// Stop does not close the channel, to prevent a concurrent goroutine
 	// reading from the channel from seeing an erroneous "tick".
-	//close(t.C)
+	// close(t.C)
 }
 
 func (t *UTicker) Start() {

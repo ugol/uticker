@@ -24,7 +24,7 @@ func main() {
 		t.WithFrequency(100*time.Millisecond),
 	)
 	defer ticker2.Stop()
-	runExample(ticker2, "Immediate start ticker at 100ms", 5*time.Second)
+	runExample(ticker2, "Immediate start ticker at 100ms", 2*time.Second)
 
 	ticker3 := t.NewUTicker(
 		t.WithImmediateStart(true),
@@ -32,15 +32,15 @@ func main() {
 		t.WithExponentialBackoff(2),
 	)
 	defer ticker3.Stop()
-	runExample(ticker3, "Immediate start ticker at 100ms with Exponential backoff", 3*time.Second)
+	runExample(ticker3, "Immediate start ticker at 100ms with Exponential backoff", 10*time.Second)
 
 	ticker4 := t.NewUTicker(
 		t.WithImmediateStart(true),
 		t.WithFrequency(100*time.Millisecond),
-		t.WithExponentialBackoffCapped(2, 3),
+		t.WithExponentialBackoffCapped(2, 8),
 	)
 	defer ticker4.Stop()
-	runExample(ticker4, "Immediate start ticker at 100ms with Exponential backoff and cap", 3*time.Second)
+	runExample(ticker4, "Immediate start ticker at 100ms with Exponential backoff and cap", 10*time.Second)
 
 	ticker5 := t.NewUTicker(
 		t.WithImmediateStart(true),
@@ -88,4 +88,6 @@ func runExample(ticker *t.UTicker, msg string, d time.Duration) {
 		close(stop)
 	})
 	wg.Wait()
+
+	fmt.Printf("Ticks: %d\n", ticker.Counter)
 }
