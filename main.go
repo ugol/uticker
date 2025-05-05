@@ -76,8 +76,8 @@ func runExample(ticker *t.UTicker, msg string, d time.Duration) {
 		defer wg.Done()
 		for {
 			select {
-			case t := <-ticker.C:
-				fmt.Println("Tick at", t)
+			case tickTime := <-ticker.C:
+				fmt.Println("Tick at", tickTime)
 			case <-stop:
 				return
 			}
