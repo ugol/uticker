@@ -4,67 +4,56 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/ugol/uticker/t"
-	"sync"
 	"testing"
-	"testing/synctest"
 	"time"
 )
 
 func TestSimpleTicker(test *testing.T) {
-	synctest.Run(func() {
-		ticker := t.NewUTicker()
-		// Create stop channel before starting
-		stop := make(chan struct{})
-
-		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			runExample(ticker, "Normal ticker at 1s", 30500*time.Millisecond)
-		}()
-
-		// Ensure cleanup happens
-		defer func() {
-			close(stop)
-			ticker.Stop()
-			wg.Wait()
-		}()
-
-		// Wait for completion or timeout
-		timer := time.NewTimer(31 * time.Second)
-		defer timer.Stop()
-
-		select {
-		case <-timer.C:
-			return
-		case <-stop:
-			assert.Equal(test, 30, int(ticker.Counter))
-		}
-	})
+	ticker := t.NewUTicker()
+	defer ticker.Stop()
+	runExample(ticker, "Simple ticker at 1s", 5*time.Second, 5, test)
 }
 
-func runExample(ticker *t.UTicker, msg string, d time.Duration) {
+func TestImmediateStartTicker(test *testing.T) {
+	ticker := t.NewUTicker(t.WithImmediateStart(true))
+	defer ticker.Stop()
+	runExample(ticker, "Immediate start ticker at 1s", 5*time.Second, 6, test)
+}
+
+func TestImmediateStartTickerWithFrequency(test *testing.T) {
+	ticker := t.NewUTicker(
+		t.WithImmediateStart(true),
+		t.WithFrequency(100*time.Millisecond),
+	)
+	defer ticker.Stop()
+	runExample(ticker, "Immediate start ticker at 100ms", 5*time.Second, 70, test)
+}
+func runExample(ticker *t.UTicker, msg string, d time.Duration, expected int, test *testing.T) {
+	stop := make(chan struct{})
+	run(ticker, msg, stop)
+
+	timer := time.NewTimer(d)
+	defer timer.Stop()
+
+	assert.Equal(test, expected, int(ticker.Counter))
+
+}
+
+func run(ticker *t.UTicker, msg string, testStop chan struct{}) {
 	fmt.Println(msg)
 	ticker.Start()
-	var wg sync.WaitGroup
 	stop := make(chan struct{})
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		for {
 			select {
 			case tickTime := <-ticker.C:
 				fmt.Println("Tick at", tickTime)
 			case <-stop:
 				return
+			case <-testStop:
+				close(stop)
+				return
 			}
 		}
 	}()
-
-	time.AfterFunc(d, func() {
-		close(stop)
-	})
-	wg.Wait()
-
-	fmt.Printf("Ticks: %d\n", ticker.Counter)
 }
